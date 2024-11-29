@@ -1,17 +1,49 @@
 from random import randint
+from termcolor import colored
 import os
 
-os.system('cls')
-
-lenTab = int(input("Choisissez la longeur du plateau (entre 12 et 24) "))
-assert 12 <= lenTab <= 24
+lenTab = 0
+while lenTab < 12 or lenTab > 24:
+    os.system('cls')
+    choix = input("Choisissez la longeur du plateau (entre 12 et 24) ")
+    try:
+        int(choix)
+    except:
+        continue
+    lenTab = int(choix)
 tab = [False]*lenTab
 
-nbCoins = int(input("Choisissez le nombre de 'coins' (entre 3 et 6) "))
-assert 3 <= nbCoins <= 6
+nbCoins = 0
+while nbCoins < 3 or nbCoins > 6:
+    os.system('cls')
+    choix = input("Choisissez le nombre de 'coins' (entre 3 et 6) ")
+    try:
+        int(choix)
+    except:
+        continue
+    nbCoins = int(choix)
 
-for i in range(nbCoins):
-    tab[-1 - i] = True
+aleatoire = None
+while aleatoire == None:
+    os.system('cls')
+    choix = input(
+        "Voulez vous que les pièces soient placées aléatoirement sur le plateau de jeu ? (o/n) ")
+    if choix == "o":
+        aleatoire = True
+    elif choix == "n":
+        aleatoire = False
+
+if aleatoire:
+    listIndex = []
+    while len(listIndex) < nbCoins:
+        index = randint(1, len(tab)-1)
+        if not index in listIndex:
+            listIndex.append(index)
+    for i in range(nbCoins):
+        tab[listIndex[i]] = True
+else:
+    for i in range(nbCoins):
+        tab[-1 - i] = True
 
 joueur = 1
 
@@ -36,15 +68,18 @@ def coinStrip():
 def jouerCoup(tab, joueur):
     """Joue le coup de l'utilisateur"""
     print()
-    indexCoup = input("Choisissez un coup (case du plateau de jeu) : ")
+    choix = input("Choisissez un coup (case du plateau de jeu) : ")
     try:
-        int(indexCoup)
+        int(choix)
     except:
         coupInvalide(tab, joueur)
-    indexCoup = int(indexCoup)
+        return
+    indexCoup = int(choix)
     indexCoup -= 1
     print()
     indexCoin = None
+    if not 0 <= indexCoup <= lenTab:
+        coupInvalide(tab, joueur)
     if tab[indexCoup]:
         coupInvalide(tab, joueur)
 
@@ -58,6 +93,7 @@ def jouerCoup(tab, joueur):
 
     tab[indexCoin] = False
     tab[indexCoup] = True
+    # TODO: corriger un bug rare qui fait disparaitre la pièce
 
 
 def coupInvalide(tab: list, joueur):
@@ -72,18 +108,19 @@ def affichage(tab: list, joueur: int, turn: int):
     print("Plateau de jeu actuel :")
     print()
     tempTab = []
+    print("| ", end="")
     for i in range(lenTab):
         if tab[i]:
-            tempTab.append(1)
+            print(colored('o', 'red'), end="")
         else:
-            tempTab.append(0)
-    print(tempTab)
-    for i in range(1, lenTab + 1):
-        if i < 10:
-            print(f" {i} ", end="")
-        else:
-            print(f" {i}", end="")
+            print("x", end="")
+        print(" | ", end="")
     print()
+    for i in range(1, lenTab + 1):
+        if i <= 10:
+            print(f"  {i} ", end="")
+        else:
+            print(f" {i} ", end="")
     print()
     input()
     print(f"Au tour du joueur {joueur}.")
